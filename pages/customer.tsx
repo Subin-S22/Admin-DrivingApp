@@ -8,6 +8,7 @@ import MyDialog from "../components/Dialog";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
 import baseAxios from "../services";
+import useLocalStorage from "../sharedHooks/useLocalStorage";
 import { MyContext } from "../store/context";
 
 // interface customerProps {
@@ -82,6 +83,7 @@ function Customer() {
   const [copyallCustomer, setcopyAllCustomer] = useState<any>([]);
   const [forEdit, setForEdit] = useState<any>({});
   const { actions, data } = store;
+  const token = useLocalStorage("token");
   const styles = {
     tableContent:
       "text-md capitalize text-gray-900 font-medium px-6 py-4 md:whitespace-nowrap",
@@ -110,16 +112,17 @@ function Customer() {
     }
   }, [data.onsuccess]);
   useEffect(() => {
-    if (data.token) {
+    console.log(token);
+    if (token) {
       fetchAllCustomers();
     }
-  }, [data.token]);
+  }, [token]);
 
   const fetchAllCustomers = async () => {
     try {
       const res = await baseAxios.get("/admin/getAllUsers", {
         headers: {
-          Authorization: `Bearer ${data.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       console.log(res.data);
@@ -208,7 +211,7 @@ function Customer() {
             </thead>
             <tbody>
               {allCustomer.map((customer: any, index: number) => (
-                <tr className={styles.tableRowBorder}>
+                <tr className={styles.tableRowBorder} key={customer._id}>
                   <td
                     className={styles.tableContent + " flex items-center gap-3"}
                   >

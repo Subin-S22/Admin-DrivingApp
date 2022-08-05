@@ -79,6 +79,7 @@ export default function CustomerFormDialog({ form }: any) {
   useEffect(() => {
     if (data.isEdit) {
       //data from the backend for the edit
+      form.endDate = form.endDate.split("/").reverse().join("-");
       setInitialValues(form);
     } else {
       setInitialValues(initial);

@@ -9,6 +9,7 @@ import MyModal from "../components/Dialog";
 import SessionDialogForm from "../components/sessionDialogForm";
 import baseAxios from "../services";
 import { toast } from "react-toastify";
+import useLocalStorage from "../sharedHooks/useLocalStorage";
 
 type Props = {};
 
@@ -34,6 +35,7 @@ function TodaySessions({}: Props) {
   const [filterSchedules, setFilterSchedules] = useState<any>([]);
   const store = useContext(MyContext);
   const { actions } = store;
+  const token = useLocalStorage("token");
 
   const styles = {
     tableContent:
@@ -60,7 +62,7 @@ function TodaySessions({}: Props) {
     try {
       const res = await baseAxios.get("/admin/getAllSchedules", {
         headers: {
-          Authorization: `Bearer ${store.data.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setAllSchedules(res.data.schedules);
@@ -84,8 +86,8 @@ function TodaySessions({}: Props) {
   };
 
   useEffect(() => {
-    if (store.data.token) fetchAllSchedules();
-  }, [store.data.token]);
+    if (token) fetchAllSchedules();
+  }, [token]);
 
   useEffect(() => {
     if (store.data.onsuccess) {
@@ -149,7 +151,7 @@ function TodaySessions({}: Props) {
               </thead>
               <tbody>
                 {allSchedules.map((item: any, index: number) => (
-                  <tr className={styles.tableRowBorder}>
+                  <tr className={styles.tableRowBorder} key={item._id}>
                     <td
                       className={
                         styles.tableContent + " flex items-center gap-3"

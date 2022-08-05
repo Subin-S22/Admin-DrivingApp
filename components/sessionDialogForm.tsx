@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Form, Formik, FormikProps } from "formik";
+import { Form, Formik } from "formik";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -204,7 +204,7 @@ export default function SessionDialogForm({ form }: any) {
                     onSubmit={handleTrainerSubmit}
                     validationSchema={sessionValidation}
                   >
-                    {(props: FormikProps<any>) => (
+                    {() => (
                       <Form>
                         <CustomField name="userId" as="select" lable="User">
                           <option hidden>Select user...</option>

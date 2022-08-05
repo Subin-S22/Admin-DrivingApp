@@ -8,6 +8,7 @@ import FormDialog from "../components/FormDialog";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
 import baseAxios from "../services";
+import useLocalStorage from "../sharedHooks/useLocalStorage";
 import { MyContext } from "../store/context";
 
 const headings = [
@@ -22,12 +23,13 @@ function trainer() {
   const [allTrainers, setAllTrainers] = useState<any[]>([]);
   const [forEdit, setForEdit] = useState<any>();
   const [trainerCopy, setTrainerCopy] = useState<any[]>([]);
+  const token = useLocalStorage("token");
 
   const fetchAllTrainer = async () => {
     try {
       const res = await baseAxios.get("/admin/getAllTrainers", {
         headers: {
-          Authorization: `Bearer ${store.data.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       console.log(res);
@@ -48,11 +50,10 @@ function trainer() {
   }, [store.data.onsuccess]);
 
   useEffect(() => {
-    console.log(store.data.token);
-    if (store.data.token) {
+    if (token) {
       fetchAllTrainer();
     }
-  }, [store.data.token]);
+  }, [token]);
 
   // if (isLoading) return '....loading'
 
