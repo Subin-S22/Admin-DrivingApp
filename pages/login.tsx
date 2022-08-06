@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
 import Head from "next/head";
+import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Fragment } from "react";
@@ -28,7 +29,6 @@ function login() {
   const useAdminLogin = () => {
     return useMutation(adminLogin, {
       onSuccess: (data: any) => {
-        console.log("data on success", data);
         localStorage.setItem("token", data.data.access_token);
         toast.success("Welcome!!", {
           position: "top-right",
@@ -37,26 +37,23 @@ function login() {
       },
 
       onError: (error: any) => {
-        console.log("data on error", error);
-        toast.error("Invalid Credentials", {
+        toast.error(error.response?.data.message, {
           position: "top-right",
         });
       },
     });
   };
 
-  const { mutate, data, error } = useAdminLogin();
+  const { mutate } = useAdminLogin();
 
   //submit on login clicked
   const handleSubmit = async (values: LoginProps) => {
     try {
       mutate(values);
-      console.log("res in login", data);
       // const res = await baseUrl.post('/admin/login', values)
       // console.log(res)
       // localStorage.setItem('token', res.data.token)
     } catch (err) {
-      console.log(error);
       toast.error("Invalid Credentials", {
         position: "top-right",
       });

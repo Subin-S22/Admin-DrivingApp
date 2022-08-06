@@ -1,17 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
+import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Head from "next/head";
+import Image from "next/image";
+import React, { useContext, useState } from "react";
+import { toast } from "react-toastify";
+import MyModal from "../components/Dialog";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
-import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
-import Image from "next/image";
-import { MyContext } from "../store/context";
-import MyModal from "../components/Dialog";
 import SessionDialogForm from "../components/sessionDialogForm";
-import baseAxios from "../services";
-import { toast } from "react-toastify";
-import useLocalStorage from "../sharedHooks/useLocalStorage";
-
-type Props = {};
+import { axiosWithAuth } from "../services";
+import { MyContext } from "../store/context";
+import { onError } from "../utils/helpers";
 
 const headings = [
   "Trainer Name",
@@ -20,22 +19,11 @@ const headings = [
   "Schedule Time",
 ];
 
-// const schedules = [
-//   {
-//     trainername: "asdlfkj",
-//     customername: "alskdj",
-//     scheduledate: "alskdj",
-//     scheduletime: "alkdfj",
-//   },
-// ];
-
-function TodaySessions({}: Props) {
+function TodaySessions() {
   const [forEdit, setForEdit] = useState<any>({});
-  const [allSchedules, setAllSchedules] = useState<any>([]);
-  const [filterSchedules, setFilterSchedules] = useState<any>([]);
   const store = useContext(MyContext);
   const { actions } = store;
-  const token = useLocalStorage("token");
+  const queryClient = useQueryClient();
 
   const styles = {
     tableContent:
@@ -45,56 +33,51 @@ function TodaySessions({}: Props) {
 
   const deleteSession = async () => {
     try {
-      await baseAxios.delete(`/admin/delete/user/schedule/${forEdit._id}`, {
-        headers: {
-          Authorization: `Bearer ${store.data.token}`,
-        },
-      });
-      toast.error("Delete successfully");
-      store.actions.handleDialogOpen(false);
-      fetchAllSchedules();
-    } catch (err: any) {
-      toast.error(err.response.data.message);
-    }
-  };
+      await axiosWithAuth.delete(`/admin/delete/user/schedule/${forEdit._id}`);
 
-  const fetchAllSchedules = async () => {
-    try {
-      const res = await baseAxios.get("/admin/getAllSchedules", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setAllSchedules(res.data.schedules);
-      setFilterSchedules(res.data.schedules);
-      console.log(res.data);
+      toast.error("Delete successfully");
+
+      store.actions.handleDialogOpen(false);
     } catch (err: any) {
-      console.log(err);
       toast.error(err.response.data.message);
     }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const temp = filterSchedules.filter(
-      (item: any) =>
-        item.trainerdetails.trainername
-          .toLowerCase()
-          .includes(e.target.value) ||
-        item.scheduledate.includes(e.target.value)
-    );
-    setAllSchedules(temp);
+    setFilter(e.target.value);
   };
 
-  useEffect(() => {
-    if (token) fetchAllSchedules();
-  }, [token]);
+  const [filter, setFilter] = useState<string>("");
+  const fetchSessions = async () => {
+    return await axiosWithAuth.get("/admin/getAllSchedules");
+  };
 
-  useEffect(() => {
-    if (store.data.onsuccess) {
-      fetchAllSchedules();
-      store.actions.updateOnChange(false);
+  const { data, isError, isLoading } = useQuery(
+    ["all-sessions"],
+    fetchSessions,
+    {
+      onError: onError,
+      select: (data) => {
+        const temp = data.data.schedules.filter(
+          (schedule: any) =>
+            schedule.scheduledate.includes(filter) ||
+            schedule.scheduletime.includes(filter) ||
+            schedule.trainerdtails.trainername.includes(filter)
+        );
+        return temp;
+      },
     }
-  }, [store.data.onsuccess]);
+  );
+
+  const { mutate: onDelete } = useMutation(deleteSession, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-sessions"]);
+    },
+  });
+
+  if (isLoading) return <h1 className="text-center text-2xl">....Loading</h1>;
+
+  if (isError) return <h1 className="text-center text-2xl">....Error</h1>;
 
   return (
     <>
@@ -150,7 +133,7 @@ function TodaySessions({}: Props) {
                 </tr>
               </thead>
               <tbody>
-                {allSchedules.map((item: any, index: number) => (
+                {data?.map((item: any) => (
                   <tr className={styles.tableRowBorder} key={item._id}>
                     <td
                       className={
@@ -174,7 +157,7 @@ function TodaySessions({}: Props) {
                       <button
                         className="btn bounce danger mr-6"
                         onClick={() => {
-                          setForEdit(allSchedules[index]);
+                          setForEdit(item);
                           actions.handleDialogOpen(true);
                         }}
                       >
@@ -197,7 +180,7 @@ function TodaySessions({}: Props) {
           </div>
         </section>
       </main>
-      <MyModal doDelete={deleteSession} />
+      <MyModal doDelete={onDelete} />
       <SessionDialogForm />
     </>
   );

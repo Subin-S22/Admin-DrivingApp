@@ -1,11 +1,12 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React from "react";
 import { Form, Formik } from "formik";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as Yup from "yup";
-import baseAxios from "../services";
+import baseAxios, { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import CustomField from "./customField";
 
@@ -23,6 +24,15 @@ const trainerValidation = Yup.object().shape({
     vin: Yup.string(),
   }),
 });
+
+interface UpdateTrainer {
+  email: string;
+  trainername: string;
+  make: string;
+  model: string;
+  vin: string;
+  status: "ONLINE" | "OFFLINE";
+}
 
 interface TrainerProp {
   email: string;
@@ -46,6 +56,7 @@ export default function FormDialog({ form }: any) {
   const [initialValues, setInitialValues] = useState<any>(initial);
   const store = useContext(MyContext);
   const { data } = store;
+  const queryClient = useQueryClient();
 
   function closeModal() {
     store.actions.handleFormDialogOpen(false);
@@ -61,14 +72,13 @@ export default function FormDialog({ form }: any) {
 
   const useTrainer = () => {
     return useMutation(addTrainer, {
-      onSuccess: (data) => {
-        console.log(data);
+      onSuccess: () => {
         toast.success("Trainer Added", { position: "top-right" });
         store.actions.updateOnChange(true);
         store.actions.handleFormDialogOpen(false);
+        queryClient.invalidateQueries(["all-trainers"]);
       },
       onError: (error: any) => {
-        console.log(error);
         toast.error(error.response.data.message, { position: "top-right" });
       },
     });
@@ -83,12 +93,21 @@ export default function FormDialog({ form }: any) {
     }
   }, [data.isEdit]);
 
+  const updateTrainer = async (obj: UpdateTrainer) => {
+    await axiosWithAuth.patch(`/admin/editTrainer/${initialValues._id}`, obj);
+  };
+
   const { mutate } = useTrainer();
+  const { mutate: patchTrainer } = useMutation(updateTrainer, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-trainers"]);
+    },
+  });
 
   const handleTrainerSubmit = async (values: TrainerProp) => {
     try {
       if (data.isEdit) {
-        const obj = {
+        const obj: UpdateTrainer = {
           email: values.email,
           trainername: values.trainername,
           make: values.cardetails.make,
@@ -96,9 +115,7 @@ export default function FormDialog({ form }: any) {
           vin: values.cardetails.vin,
           status: "ONLINE",
         };
-        await baseAxios.patch(`/admin/editTrainer/${initialValues._id}`, obj, {
-          headers: { Authorization: `Bearer ${store.data.token}` },
-        });
+        patchTrainer(obj);
         toast.success("Trainer edited succesfully", {
           position: "top-right",
         });
@@ -106,7 +123,6 @@ export default function FormDialog({ form }: any) {
         store.actions.handleFormDialogOpen(false);
       } else {
         mutate(values);
-        console.log(values);
       }
     } catch (err: any) {
       toast.error(err.response.data.message, {

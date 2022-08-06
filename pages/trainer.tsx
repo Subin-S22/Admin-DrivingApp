@@ -1,14 +1,15 @@
 import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import Head from "next/head";
 import Image from "next/image";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import MyModal from "../components/Dialog";
 import FormDialog from "../components/FormDialog";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
-import baseAxios from "../services";
-import useLocalStorage from "../sharedHooks/useLocalStorage";
+import baseAxios, { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 
 const headings = [
@@ -19,47 +20,10 @@ const headings = [
 ];
 
 function trainer() {
+  const queryClient = useQueryClient();
+
   const store = useContext(MyContext);
-  const [allTrainers, setAllTrainers] = useState<any[]>([]);
   const [forEdit, setForEdit] = useState<any>();
-  const [trainerCopy, setTrainerCopy] = useState<any[]>([]);
-  const token = useLocalStorage("token");
-
-  const fetchAllTrainer = async () => {
-    try {
-      const res = await baseAxios.get("/admin/getAllTrainers", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(res);
-      setAllTrainers(res.data.trainers);
-      setTrainerCopy(res.data.trainers);
-      return res;
-    } catch (err) {
-      console.error(err);
-      return err;
-    }
-  };
-
-  useEffect(() => {
-    if (store.data.onsuccess) {
-      fetchAllTrainer();
-      store.actions.updateOnChange(false);
-    }
-  }, [store.data.onsuccess]);
-
-  useEffect(() => {
-    if (token) {
-      fetchAllTrainer();
-    }
-  }, [token]);
-
-  // if (isLoading) return '....loading'
-
-  // if (isError) return '...error'
-
-  // console.log(isError, isLoading, data, error);
 
   const styles = {
     tableContent:
@@ -69,13 +33,7 @@ function trainer() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    const tempTrainer = trainerCopy.filter((item) => {
-      return (
-        item.trainername.toLowerCase().includes(value.toLowerCase()) ||
-        item.phonenumber.includes(value)
-      );
-    });
-    setAllTrainers(tempTrainer);
+    setFilter(value);
   };
 
   const deleteTrainer = async () => {
@@ -84,7 +42,6 @@ function trainer() {
         headers: { Authorization: `Bearer ${store.data.token}` },
       });
       toast.error("Deleted successfully", { position: "top-right" });
-      fetchAllTrainer();
       store.actions.handleDialogOpen(false);
     } catch (err) {
       toast.error("Something went wrong!", { position: "top-right" });
@@ -99,28 +56,55 @@ function trainer() {
       } else {
         status = "ONLINE";
       }
-      await baseAxios.patch(
-        `/admin/editTrainer/${trainer._id}`,
-        { status: status },
-        {
-          headers: {
-            Authorization: `Bearer ${store.data.token}`,
-          },
-        }
-      );
+      await axiosWithAuth.patch(`/admin/editTrainer/${trainer._id}`, {
+        status: status,
+      });
 
       toast.success("Trainer Status updated...");
-      const temp = allTrainers.map((item) => {
-        if (item._id === trainer._id) return { ...item, status: status };
-        return item;
-      });
-      setAllTrainers(temp);
-
-      // fetchAllTrainer();
     } catch (err: any) {
       toast.error(err.response.data.message);
     }
   };
+
+  const fetchTrainer = async () => {
+    return await axiosWithAuth.get("/admin/getAllTrainers");
+  };
+
+  const onError = (err: AxiosError<any, any>) => {
+    toast.error(err.response?.data.message);
+  };
+  const [filter, setFilter] = useState<string>("");
+
+  const { data, isLoading, isError } = useQuery(
+    ["all-trainers"],
+    fetchTrainer,
+    {
+      onError: onError,
+      select: (data) => {
+        const temp = data.data.trainers.filter(
+          (trainer: any) =>
+            trainer.phonenumber.includes(filter) ||
+            trainer.trainername.includes(filter)
+        );
+        return temp;
+      },
+    }
+  );
+
+  const { mutate: onDelete } = useMutation(deleteTrainer, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-trainers"]);
+    },
+  });
+
+  const { mutate: statusChange } = useMutation(changeStatus, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-trainers"]);
+    },
+  });
+  if (isLoading) return <h1 className="text-center text-2xl">....Loading</h1>;
+
+  if (isError) return <h1 className="text-center text-2xl">....Error</h1>;
 
   return (
     <>
@@ -176,7 +160,7 @@ function trainer() {
               </tr>
             </thead>
             <tbody>
-              {allTrainers.map((trainer, index) => (
+              {data?.map((trainer: any) => (
                 <tr className={styles.tableRowBorder} key={trainer.phonenumber}>
                   <td
                     className={styles.tableContent + " flex items-center gap-3"}
@@ -208,7 +192,7 @@ function trainer() {
                           : "danger"
                       } mr-6 p-2`}
                       onClick={() => {
-                        changeStatus(trainer);
+                        statusChange(trainer);
                       }}
                     >
                       {trainer.status}
@@ -243,7 +227,7 @@ function trainer() {
           </div>
         </div> */}
       </main>
-      <MyModal doDelete={deleteTrainer} />
+      <MyModal doDelete={onDelete} />
       <FormDialog form={forEdit} />
     </>
   );

@@ -1,4 +1,6 @@
-import { NextRouter } from "next/router";
+import type { AxiosError } from "axios";
+import type { NextRouter } from "next/router";
+import { toast } from "react-toastify";
 
 export const sidebarRoute = (link: string, navigate: NextRouter) => {
   switch (link) {
@@ -65,12 +67,16 @@ export const threeDate = () => {
 export const scheduleTimes = [
   "07:00 AM-8:00 AM",
   "08:00 AM-09:00 AM",
-  "09:00 AM-10:00 Am",
+  "09:00 AM-10:00 AM",
   "10:00 AM-11:00 AM",
   "11:00 AM-12:00 PM",
-  "12:00 PM-01 PM",
+  "12:00 PM-01:00 PM",
   "02:00 PM-03:00 PM",
   "03:00 PM-04:00 PM",
   "04:00 PM-05:00 PM",
   "05:00 PM-06:00 PM",
 ];
+
+export const onError = (err: AxiosError<any, any>) => {
+  toast.error(err.response?.data.message);
+};
