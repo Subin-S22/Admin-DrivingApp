@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import React from "react";
 import Head from "next/head";
 import DashboardCard from "../components/dashboardCard";
 import NavBar from "../components/navBar";
@@ -71,7 +72,7 @@ const Home: NextPage = () => {
         md:ml-10 md:mt-8 h-max m-1 md:m-0"
         >
           {dashboardInfo.map((info) => (
-            <DashboardCard info={info} />
+            <DashboardCard info={info} key={info.name} />
           ))}
         </section>
       </section>

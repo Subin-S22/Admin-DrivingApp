@@ -1,26 +1,16 @@
 import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Head from "next/head";
 import Image from "next/image";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import CustomerFormDialog from "../components/customerDialogForm";
 import MyDialog from "../components/Dialog";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
-import baseAxios from "../services";
-import useLocalStorage from "../sharedHooks/useLocalStorage";
+import { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
-
-// interface customerProps {
-//   billnumber: string;
-//   email: string;
-//   phonenumber: string;
-//   name: string;
-//   startDate: string;
-//   endDate: string;
-//   password: string;
-//   allowschedule: string;
-// }
+import { onError } from "../utils/helpers";
 
 const headings = [
   "Bill Number",
@@ -32,129 +22,68 @@ const headings = [
   "Number of Classes",
 ];
 
-// const customerDetails: customerProps[] = [
-//   {
-//     billNumber: 1,
-//     customerName: 'saldkfj',
-//     customerMobileNumber: '8979823749873',
-//     date: '21/2/2020',
-//     numberOfClasses: 3,
-//   },
-//   {
-//     billNumber: 2,
-//     customerName: 'glkjlkr',
-//     customerMobileNumber: '8979823749873',
-//     date: '21/2/2020',
-//     numberOfClasses: 3,
-//   },
-//   {
-//     billNumber: 3,
-//     customerName: 'kgjuri',
-//     customerMobileNumber: '8979823749873',
-//     date: '21/2/2020',
-//     numberOfClasses: 3,
-//   },
-//   {
-//     billNumber: 4,
-//     customerName: 'jlkdjsflkj',
-//     customerMobileNumber: '8979823749873',
-//     date: '21/2/2020',
-//     numberOfClasses: 3,
-//   },
-//   {
-//     billNumber: 5,
-//     customerName: 'jlkdjsflkj',
-//     customerMobileNumber: '8979823749873',
-//     date: '21/2/2020',
-//     numberOfClasses: 3,
-//   },
-//   {
-//     billNumber: 6,
-//     customerName: 'jlkdjsflkj',
-//     customerMobileNumber: '8979823749873',
-//     date: '21/2/2020',
-//     numberOfClasses: 3,
-//   },
-// ];
-
 function Customer() {
   const store = useContext(MyContext);
-  const [allCustomer, setAllCustomer] = useState<any>([]);
-  const [copyallCustomer, setcopyAllCustomer] = useState<any>([]);
   const [forEdit, setForEdit] = useState<any>({});
-  const { actions, data } = store;
-  const token = useLocalStorage("token");
+  const { actions } = store;
+  const queryClient = useQueryClient();
+
   const styles = {
     tableContent:
       "text-md capitalize text-gray-900 font-medium px-6 py-4 md:whitespace-nowrap",
     tableRowBorder: "border-b border-gray-300",
   };
 
-  // const [trainer, setTrainer] = useState<customerProps[]>(customerDetails);
-  // const [trainerCopy, setTrainerCopy] =
-  //   useState<customerProps[]>(customerDetails);
-
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    const allcust = copyallCustomer.filter((item: any) => {
-      return (
-        item.name.toLowerCase().includes(value) ||
-        item.phonenumber.includes(value)
-      );
-    });
-    setAllCustomer(allcust);
+    setFilter(value);
   };
 
-  useEffect(() => {
-    if (data.onsuccess) {
-      fetchAllCustomers();
-      actions.updateOnChange(false);
-    }
-  }, [data.onsuccess]);
-  useEffect(() => {
-    console.log(token);
-    if (token) {
-      fetchAllCustomers();
-    }
-  }, [token]);
-
-  const fetchAllCustomers = async () => {
+  const deleteCustomer = async () => {
     try {
-      const res = await baseAxios.get("/admin/getAllUsers", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(res.data);
-      setAllCustomer(res.data.users);
-      setcopyAllCustomer(res.data.users);
-      return res;
-    } catch (err) {
-      console.log(err);
-      toast.error("Error while fetching!", {
-        position: "top-right",
-      });
-    }
-  };
-
-  const deleteCustomer = () => {
-    try {
-      baseAxios.delete(`/admin/deleteUser/${forEdit._id}`, {
-        headers: {
-          Authorization: `Bearer ${store.data.token}`,
-        },
-      });
+      await axiosWithAuth.delete(`/admin/deleteUser/${forEdit._id}`);
       store.actions.handleDialogOpen(false);
       toast.error("Deleted Successfully", {
         position: "top-right",
       });
-      fetchAllCustomers();
+      // fetchAllCustomers();
     } catch (err) {
       toast.error("Something went error", {
         position: "top-right",
       });
     }
   };
+
+  const [filter, setFilter] = useState<string>("");
+  const fetchCustomers = async () => {
+    return await axiosWithAuth.get("/admin/getAllUsers");
+  };
+
+  const {
+    data: users,
+    isLoading,
+    isError,
+  } = useQuery(["all-customers"], fetchCustomers, {
+    onError: onError,
+    select: (data) => {
+      const temp = data.data.users.filter(
+        (customer: any) =>
+          customer.name.includes(filter) ||
+          customer.email.includes(filter) ||
+          customer.phonenumber.includes(filter)
+      );
+      return temp;
+    },
+  });
+  const { mutate: onDelete } = useMutation(deleteCustomer, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-customers"]);
+    },
+  });
+
+  if (isLoading) return <h1 className="text-center text-2xl">....Loading</h1>;
+
+  if (isError) return <h1 className="text-center text-2xl">....Error</h1>;
 
   return (
     <>
@@ -182,7 +111,6 @@ function Customer() {
               />
             </div>
           </div>
-          {/* <h1 className="hidden md:block text-4xl text-center w-full">Trainers</h1> */}
           <div className="w-full">
             <div
               className="w-max flex gap-2 justify-center items-center btn bounce float-right "
@@ -210,7 +138,7 @@ function Customer() {
               </tr>
             </thead>
             <tbody>
-              {allCustomer.map((customer: any, index: number) => (
+              {users?.map((customer: any) => (
                 <tr className={styles.tableRowBorder} key={customer._id}>
                   <td
                     className={styles.tableContent + " flex items-center gap-3"}
@@ -237,7 +165,7 @@ function Customer() {
                     <button
                       className="btn bounce danger mr-6"
                       onClick={() => {
-                        setForEdit(allCustomer[index]);
+                        setForEdit(customer);
                         actions.handleDialogOpen(true);
                       }}
                     >
@@ -246,7 +174,7 @@ function Customer() {
                     <button
                       className="btn bounce"
                       onClick={() => {
-                        setForEdit(allCustomer[index]);
+                        setForEdit(customer);
                         actions.handleFormDialogOpen(true, true);
                       }}
                     >
@@ -258,13 +186,8 @@ function Customer() {
             </tbody>
           </table>
         </div>
-        {/* <div>
-          <div>
-
-          </div>
-        </div> */}
       </main>
-      <MyDialog doDelete={deleteCustomer} />
+      <MyDialog doDelete={onDelete} />
       <CustomerFormDialog form={forEdit} />
     </>
   );

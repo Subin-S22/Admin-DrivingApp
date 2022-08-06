@@ -1,11 +1,13 @@
+import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Form, Formik } from "formik";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as Yup from "yup";
-import baseAxios from "../services";
+import { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import { minDate } from "../utils/helpers";
 import CustomField from "./customField";
@@ -18,6 +20,11 @@ interface CustomerProp {
   startDate: string;
   endDate: string;
   allowschedule: string;
+}
+
+interface UpdateUser {
+  values: CustomerProp;
+  formatED: string;
 }
 
 const initial: CustomerProp = {
@@ -48,30 +55,26 @@ export default function CustomerFormDialog({ form }: any) {
   const [initialValues, setInitialValues] = useState<CustomerProp>(initial);
   const store = useContext(MyContext);
   const { data } = store;
+  const queryClient = useQueryClient();
 
   function closeModal() {
     store.actions.handleFormDialogOpen(false);
   }
 
   const addUser = async (values: CustomerProp) => {
-    return await baseAxios.post("/admin/addUser", values, {
-      headers: {
-        Authorization: `Bearer ${data.token}`,
-      },
-    });
+    return await axiosWithAuth.post("/admin/addUser", values);
   };
 
   const useUser = () => {
     return useMutation(addUser, {
-      onSuccess: (data) => {
-        console.log(data);
+      onSuccess: () => {
         store.actions.updateOnChange(true);
         store.actions.handleFormDialogOpen(false);
         toast.success("User added successfully");
+        queryClient.invalidateQueries(["all-customers"]);
       },
-      onError: (error: any) => {
-        console.log(error);
-        toast.error(error.response.data.message);
+      onError: (error: AxiosError<any>) => {
+        toast.error(error.response?.data.message);
       },
     });
   };
@@ -86,7 +89,30 @@ export default function CustomerFormDialog({ form }: any) {
     }
   }, [data.isEdit]);
 
-  const { mutate, error } = useUser();
+  const updateUser = async ({ values, formatED }: UpdateUser) => {
+    await axiosWithAuth.patch(
+      `/admin/editUser/${form._id}`,
+      {
+        email: values.email,
+        name: values.name,
+        endDate: formatED,
+        allowschedule: values.allowschedule,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${store.data.token}`,
+        },
+      }
+    );
+  };
+
+  const { mutate } = useUser();
+
+  const { mutate: patchUser } = useMutation(updateUser, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-customers"]);
+    },
+  });
 
   const handleTrainerSubmit = async (values: CustomerProp) => {
     //start date formated
@@ -109,20 +135,7 @@ export default function CustomerFormDialog({ form }: any) {
     };
     try {
       if (data.isEdit) {
-        await baseAxios.patch(
-          `/admin/editUser/${form._id}`,
-          {
-            email: values.email,
-            name: values.name,
-            endDate: formatED,
-            allowschedule: values.allowschedule,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${store.data.token}`,
-            },
-          }
-        );
+        patchUser({ values, formatED });
         toast.success("Customer edited succesfully", {
           position: "top-right",
         });
@@ -132,8 +145,7 @@ export default function CustomerFormDialog({ form }: any) {
         mutate(newObj);
       }
     } catch (err: any) {
-      console.log(error);
-      toast.error(err.response.data.message, {
+      toast.error(err.response?.data.message, {
         position: "top-right",
       });
     }
@@ -180,11 +192,6 @@ export default function CustomerFormDialog({ form }: any) {
                   >
                     Add User Details
                   </Dialog.Title>
-                  {/* <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      If you delete this, you can not undo the actions. Please check once before you proceed.
-                    </p>
-                  </div> */}
                   <Formik
                     initialValues={initialValues}
                     enableReinitialize={true}

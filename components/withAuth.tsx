@@ -1,7 +1,10 @@
 import { useRouter } from "next/router";
 import React from "react";
 
-const withAuth = <T extends object>(Component: React.ComponentType<T>) => {
+export default function withAuth<T extends object>(
+  Component: React.ComponentType<T>
+) {
+  // eslint-disable-next-line react/display-name
   return (props: any) => {
     if (typeof window !== "undefined") {
       const router = useRouter();
@@ -17,6 +20,4 @@ const withAuth = <T extends object>(Component: React.ComponentType<T>) => {
     }
     return null;
   };
-};
-
-export default withAuth;
+}
