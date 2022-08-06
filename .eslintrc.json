@@ -21,8 +21,6 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "no-console":"error",
-        "no-unused-vars":"error"
     },
     "overrides": [
     {
