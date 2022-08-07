@@ -60,7 +60,8 @@ function TodaySessions() {
         (schedule: any) =>
           schedule.scheduledate.includes(filter) ||
           schedule.scheduletime.includes(filter) ||
-          schedule.trainerdtails.trainername.includes(filter)
+          schedule.trainerdtails.trainername.includes(filter) ||
+          schedule.user.name.includes(filter)
       );
       return temp;
     },
