@@ -120,7 +120,7 @@ export default function SessionDialogForm() {
   /********************************************************************** */
   //// react query
 
-  const { mutate, isLoading } = useMutation(handleTrainerSubmit, {
+  const { mutate } = useMutation(handleTrainerSubmit, {
     onSuccess: () => {
       queryClient.invalidateQueries(["all-sessions"]);
     },
@@ -233,10 +233,6 @@ export default function SessionDialogForm() {
                           name="trainerId"
                           as="select"
                           lable="Trainer"
-                          // onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          //   console.log(props.values);
-                          //   getTrainer(e, props);
-                          // }}
                         >
                           <option hidden>Select trainer...</option>
                           {trainers?.data.trainers.map((trainer: any) => (
