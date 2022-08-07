@@ -145,7 +145,7 @@ function TodaySessions() {
                         {item.trainerdetails.trainername}{" "}
                       </label>
                     </td>
-                    <td className={styles.tableContent}>{item.userid}</td>
+                    <td className={styles.tableContent}>{item.user.name}</td>
                     <td className={styles.tableContent}>{item.scheduledate}</td>
                     <td className={styles.tableContent + " flex items-center"}>
                       <label className="mr-8">{item.scheduletime}</label>

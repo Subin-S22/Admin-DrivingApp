@@ -34,7 +34,7 @@ const initial: CustomerProp = {
   name: "",
   startDate: "",
   endDate: "",
-  allowschedule: 1,
+  allowschedule: 0,
 };
 
 const customerValidation = Yup.object().shape({
