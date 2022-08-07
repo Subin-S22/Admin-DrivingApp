@@ -1,7 +1,6 @@
 import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { Form, Formik } from "formik";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
