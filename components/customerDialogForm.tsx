@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import * as Yup from "yup";
 import { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
-import { minDate } from "../utils/helpers";
+import { minDate, onError } from "../utils/helpers";
 import CustomField from "./customField";
 
 interface CustomerProp {
@@ -73,9 +73,7 @@ export default function CustomerFormDialog({ form }: any) {
         toast.success("User added successfully");
         queryClient.invalidateQueries(["all-customers"]);
       },
-      onError: (error: AxiosError<any>) => {
-        toast.error(error.response?.data.message);
-      },
+      onError: onError,
     });
   };
 
