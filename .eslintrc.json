@@ -22,6 +22,7 @@
     ],
     "rules": {
     },
+    "ignorePatterns":["*.config.js"],
     "overrides": [
     {
       "files": ["bin/*.js", "lib/*.js", "*.config.js"]
