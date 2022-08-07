@@ -10,6 +10,7 @@ import { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import { nextDate, onError, scheduleTimes, threeDate } from "../utils/helpers";
 import CustomField from "./customField";
+import Loader from "./Loader";
 
 interface SessionProp {
   userId?: string;
@@ -120,7 +121,7 @@ export default function SessionDialogForm() {
   /********************************************************************** */
   //// react query
 
-  const mutation = useMutation(handleTrainerSubmit, {
+  const { mutate, isLoading } = useMutation(handleTrainerSubmit, {
     onSuccess: () => {
       queryClient.invalidateQueries(["all-sessions"]);
     },
@@ -191,7 +192,7 @@ export default function SessionDialogForm() {
                     initialValues={initialValues}
                     enableReinitialize={true}
                     onSubmit={(values) => {
-                      mutation.mutate(values);
+                      mutate(values);
                     }}
                     validationSchema={sessionValidation}
                   >

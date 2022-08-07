@@ -9,6 +9,7 @@ import * as Yup from "yup";
 import baseAxios, { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import CustomField from "./customField";
+import Loader from "./Loader";
 
 const trainerValidation = Yup.object().shape({
   email: Yup.string().email("Email is not valid").required("Required."),
@@ -94,15 +95,21 @@ export default function FormDialog({ form }: any) {
   }, [data.isEdit]);
 
   const updateTrainer = async (obj: UpdateTrainer) => {
-    await axiosWithAuth.patch(`/admin/editTrainer/${initialValues._id}`, obj);
+    return await axiosWithAuth.patch(
+      `/admin/editTrainer/${initialValues._id}`,
+      obj
+    );
   };
 
-  const { mutate } = useTrainer();
-  const { mutate: patchTrainer } = useMutation(updateTrainer, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(["all-trainers"]);
-    },
-  });
+  const { mutate, isLoading: isAdded } = useTrainer();
+  const { mutate: patchTrainer, isLoading: isUpdated } = useMutation(
+    updateTrainer,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["all-trainers"]);
+      },
+    }
+  );
 
   const handleTrainerSubmit = async (values: TrainerProp) => {
     try {

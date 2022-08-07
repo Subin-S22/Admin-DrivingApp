@@ -5,6 +5,7 @@ import Image from "next/image";
 import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import MyModal from "../components/Dialog";
+import Loader from "../components/Loader";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
 import SessionDialogForm from "../components/sessionDialogForm";
@@ -52,22 +53,18 @@ function TodaySessions() {
     return await axiosWithAuth.get("/admin/getAllSchedules");
   };
 
-  const { data, isError, isLoading } = useQuery(
-    ["all-sessions"],
-    fetchSessions,
-    {
-      onError: onError,
-      select: (data) => {
-        const temp = data.data.schedules.filter(
-          (schedule: any) =>
-            schedule.scheduledate.includes(filter) ||
-            schedule.scheduletime.includes(filter) ||
-            schedule.trainerdtails.trainername.includes(filter)
-        );
-        return temp;
-      },
-    }
-  );
+  const { data, isLoading } = useQuery(["all-sessions"], fetchSessions, {
+    onError: onError,
+    select: (data) => {
+      const temp = data.data.schedules.filter(
+        (schedule: any) =>
+          schedule.scheduledate.includes(filter) ||
+          schedule.scheduletime.includes(filter) ||
+          schedule.trainerdtails.trainername.includes(filter)
+      );
+      return temp;
+    },
+  });
 
   const { mutate: onDelete } = useMutation(deleteSession, {
     onSuccess: () => {
@@ -75,9 +72,7 @@ function TodaySessions() {
     },
   });
 
-  if (isLoading) return <h1 className="text-center text-2xl">....Loading</h1>;
-
-  if (isError) return <h1 className="text-center text-2xl">....Error</h1>;
+  if (isLoading) return <Loader />;
 
   return (
     <>

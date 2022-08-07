@@ -11,6 +11,7 @@ import { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import { minDate } from "../utils/helpers";
 import CustomField from "./customField";
+import Loader from "./Loader";
 
 interface CustomerProp {
   billnumber: string;
@@ -90,29 +91,23 @@ export default function CustomerFormDialog({ form }: any) {
   }, [data.isEdit]);
 
   const updateUser = async ({ values, formatED }: UpdateUser) => {
-    await axiosWithAuth.patch(
-      `/admin/editUser/${form._id}`,
-      {
-        email: values.email,
-        name: values.name,
-        endDate: formatED,
-        allowschedule: values.allowschedule,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${store.data.token}`,
-        },
-      }
-    );
+    return await axiosWithAuth.patch(`/admin/editUser/${form._id}`, {
+      email: values.email,
+      name: values.name,
+      endDate: formatED,
+      allowschedule: values.allowschedule,
+    });
   };
 
-  const { mutate } = useUser();
+  const { mutate, isLoading: isAdded } = useUser();
 
-  const { mutate: patchUser } = useMutation(updateUser, {
+  const { mutate: patchUser, isLoading: isUpdated } = useMutation(updateUser, {
     onSuccess: () => {
       queryClient.invalidateQueries(["all-customers"]);
     },
   });
+
+  console.log("alksdjf", isUpdated);
 
   const handleTrainerSubmit = async (values: CustomerProp) => {
     //start date formated

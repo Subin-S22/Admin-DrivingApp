@@ -7,10 +7,12 @@ import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import MyModal from "../components/Dialog";
 import FormDialog from "../components/FormDialog";
+import Loader from "../components/Loader";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
 import baseAxios, { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
+import { onError } from "../utils/helpers";
 
 const headings = [
   "Trainer Name",
@@ -70,26 +72,19 @@ function trainer() {
     return await axiosWithAuth.get("/admin/getAllTrainers");
   };
 
-  const onError = (err: AxiosError<any, any>) => {
-    toast.error(err.response?.data.message);
-  };
   const [filter, setFilter] = useState<string>("");
 
-  const { data, isLoading, isError } = useQuery(
-    ["all-trainers"],
-    fetchTrainer,
-    {
-      onError: onError,
-      select: (data) => {
-        const temp = data.data.trainers.filter(
-          (trainer: any) =>
-            trainer.phonenumber.includes(filter) ||
-            trainer.trainername.includes(filter)
-        );
-        return temp;
-      },
-    }
-  );
+  const { data, isLoading } = useQuery(["all-trainers"], fetchTrainer, {
+    onError: onError,
+    select: (data) => {
+      const temp = data.data.trainers.filter(
+        (trainer: any) =>
+          trainer.phonenumber.includes(filter) ||
+          trainer.trainername.includes(filter)
+      );
+      return temp;
+    },
+  });
 
   const { mutate: onDelete } = useMutation(deleteTrainer, {
     onSuccess: () => {
@@ -102,9 +97,8 @@ function trainer() {
       queryClient.invalidateQueries(["all-trainers"]);
     },
   });
-  if (isLoading) return <h1 className="text-center text-2xl">....Loading</h1>;
 
-  if (isError) return <h1 className="text-center text-2xl">....Error</h1>;
+  if (isLoading) return <Loader />;
 
   return (
     <>

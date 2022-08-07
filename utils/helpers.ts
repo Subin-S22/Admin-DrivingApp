@@ -77,6 +77,8 @@ export const scheduleTimes = [
   "05:00 PM-06:00 PM",
 ];
 
-export const onError = (err: AxiosError<any, any>) => {
-  toast.error(err.response?.data.message);
+export const onError = (err: AxiosError<any>) => {
+  console.log(err);
+
+  toast.error(err.response?.data?.message || err?.message || "Error Occured.");
 };

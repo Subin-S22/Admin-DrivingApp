@@ -6,6 +6,7 @@ import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import CustomerFormDialog from "../components/customerDialogForm";
 import MyDialog from "../components/Dialog";
+import Loader from "../components/Loader";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
 import { axiosWithAuth } from "../services";
@@ -59,31 +60,29 @@ function Customer() {
     return await axiosWithAuth.get("/admin/getAllUsers");
   };
 
-  const {
-    data: users,
-    isLoading,
-    isError,
-  } = useQuery(["all-customers"], fetchCustomers, {
-    onError: onError,
-    select: (data) => {
-      const temp = data.data.users.filter(
-        (customer: any) =>
-          customer.name.includes(filter) ||
-          customer.email.includes(filter) ||
-          customer.phonenumber.includes(filter)
-      );
-      return temp;
-    },
-  });
+  const { data: users, isLoading } = useQuery(
+    ["all-customers"],
+    fetchCustomers,
+    {
+      onError: onError,
+      select: (data) => {
+        const temp = data.data.users.filter(
+          (customer: any) =>
+            customer.name.includes(filter) ||
+            customer.email.includes(filter) ||
+            customer.phonenumber.includes(filter)
+        );
+        return temp;
+      },
+    }
+  );
   const { mutate: onDelete } = useMutation(deleteCustomer, {
     onSuccess: () => {
       queryClient.invalidateQueries(["all-customers"]);
     },
   });
 
-  if (isLoading) return <h1 className="text-center text-2xl">....Loading</h1>;
-
-  if (isError) return <h1 className="text-center text-2xl">....Error</h1>;
+  if (isLoading) return <Loader />;
 
   return (
     <>
