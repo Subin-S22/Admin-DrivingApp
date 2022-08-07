@@ -10,6 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import CustomField from "../components/customField";
 import CarLogo from "../public/carlogo.webp";
 import baseUrl from "../services";
+import Loader from "../components/Loader";
 
 interface LoginProps {
   email: string;
@@ -44,7 +45,7 @@ function login() {
     });
   };
 
-  const { mutate } = useAdminLogin();
+  const { mutate, isLoading } = useAdminLogin();
 
   //submit on login clicked
   const handleSubmit = async (values: LoginProps) => {
@@ -59,6 +60,8 @@ function login() {
       });
     }
   };
+
+  if (isLoading) return <Loader />;
 
   return (
     <Fragment>
