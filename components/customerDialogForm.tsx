@@ -11,7 +11,6 @@ import { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import { minDate } from "../utils/helpers";
 import CustomField from "./customField";
-import Loader from "./Loader";
 
 interface CustomerProp {
   billnumber: string;
@@ -99,7 +98,7 @@ export default function CustomerFormDialog({ form }: any) {
     });
   };
 
-  const { mutate, isLoading: isAdded } = useUser();
+  const { mutate } = useUser();
 
   const { mutate: patchUser, isLoading: isUpdated } = useMutation(updateUser, {
     onSuccess: () => {

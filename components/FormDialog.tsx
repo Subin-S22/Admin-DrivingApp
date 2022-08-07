@@ -9,7 +9,6 @@ import * as Yup from "yup";
 import baseAxios, { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import CustomField from "./customField";
-import Loader from "./Loader";
 
 const trainerValidation = Yup.object().shape({
   email: Yup.string().email("Email is not valid").required("Required."),

@@ -10,7 +10,6 @@ import { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import { nextDate, onError, scheduleTimes, threeDate } from "../utils/helpers";
 import CustomField from "./customField";
-import Loader from "./Loader";
 
 interface SessionProp {
   userId?: string;
