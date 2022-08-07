@@ -79,7 +79,7 @@ function trainer() {
       const temp = data.data.trainers.filter(
         (trainer: any) =>
           trainer.phonenumber.includes(filter) ||
-          trainer.trainername.includes(filter)
+          trainer.trainername.toLowerCase().includes(filter.toLowerCase())
       );
       return temp;
     },

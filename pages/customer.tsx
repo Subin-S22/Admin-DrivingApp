@@ -68,8 +68,8 @@ function Customer() {
       select: (data) => {
         const temp = data.data.users.filter(
           (customer: any) =>
-            customer.name.includes(filter) ||
-            customer.email.includes(filter) ||
+            customer.name.toLowerCase().includes(filter.toLowerCase()) ||
+            customer.email.toLowerCase().includes(filter.toLowerCase()) ||
             customer.phonenumber.includes(filter)
         );
         return temp;
