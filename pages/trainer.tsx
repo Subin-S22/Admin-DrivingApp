@@ -1,6 +1,5 @@
 import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import React, { useContext, useState } from "react";

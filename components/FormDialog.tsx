@@ -100,15 +100,12 @@ export default function FormDialog({ form }: any) {
     );
   };
 
-  const { mutate, isLoading: isAdded } = useTrainer();
-  const { mutate: patchTrainer, isLoading: isUpdated } = useMutation(
-    updateTrainer,
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["all-trainers"]);
-      },
-    }
-  );
+  const { mutate } = useTrainer();
+  const { mutate: patchTrainer } = useMutation(updateTrainer, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-trainers"]);
+    },
+  });
 
   const handleTrainerSubmit = async (values: TrainerProp) => {
     try {
