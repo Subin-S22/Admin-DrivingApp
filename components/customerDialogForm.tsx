@@ -19,7 +19,7 @@ interface CustomerProp {
   name: string;
   startDate: string;
   endDate: string;
-  allowschedule: string;
+  allowschedule: number;
 }
 
 interface UpdateUser {
@@ -34,7 +34,7 @@ const initial: CustomerProp = {
   name: "",
   startDate: "",
   endDate: "",
-  allowschedule: "",
+  allowschedule: 1,
 };
 
 const customerValidation = Yup.object().shape({
@@ -243,6 +243,7 @@ export default function CustomerFormDialog({ form }: any) {
                       <CustomField
                         name="allowschedule"
                         lable="Total classes"
+                        type="number"
                         placeholder="Enter the total classes..."
                       />
                       <div className="mt-4 float-right">
