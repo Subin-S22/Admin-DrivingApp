@@ -74,7 +74,7 @@ function login() {
       >
         <div
           className="rounded shadow-md p-4 md:p-8 lg:p-12 bg-gray-200 flex 
-        flex-col md:flex-row md:items-center md:gap-4 w-[25%]"
+        flex-col md:flex-row md:items-center md:gap-4 w-[70%] md:w-[40%]"
         >
           <div className="w-full">
             <div className="relative w-full aspect-square mx-auto hidden md:block">
