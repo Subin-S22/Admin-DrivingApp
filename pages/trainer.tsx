@@ -11,6 +11,7 @@ import NavigationBar from "../components/navigationBar";
 import baseAxios, { axiosWithAuth } from "../services";
 import { MyContext } from "../store/context";
 import { onError } from "../utils/helpers";
+import { useSession } from "next-auth/react";
 
 const headings = [
   "Trainer Name",
@@ -25,6 +26,9 @@ function trainer() {
 
   const store = useContext(MyContext);
   const [forEdit, setForEdit] = useState<any>();
+
+  const { data: session } = useSession();
+  console.log("session", session);
 
   const styles = {
     tableContent:

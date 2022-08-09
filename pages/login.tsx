@@ -11,6 +11,7 @@ import CustomField from "../components/customField";
 import CarLogo from "../public/carlogo.webp";
 import baseUrl from "../services";
 import Loader from "../components/Loader";
+import { signIn } from "next-auth/react";
 
 interface LoginProps {
   email: string;
@@ -30,7 +31,12 @@ function login() {
   const useAdminLogin = () => {
     return useMutation(adminLogin, {
       onSuccess: (data: any) => {
-        localStorage.setItem("token", data.data.access_token);
+        const token = data.data.access_token;
+        localStorage.setItem("token", token);
+        signIn("credentials", {
+          data: data.data,
+          redirect: false,
+        });
         toast.success("Welcome!!", {
           position: "top-right",
         });
