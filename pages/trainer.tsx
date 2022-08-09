@@ -1,7 +1,6 @@
 import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Head from "next/head";
-import Image from "next/image";
 import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import MyModal from "../components/Dialog";
@@ -18,6 +17,7 @@ const headings = [
   "Mobile Number",
   "Email Address",
   "Car Details",
+  "Actions",
 ];
 
 function trainer() {
@@ -158,19 +158,13 @@ function trainer() {
                   <td
                     className={styles.tableContent + " flex items-center gap-3"}
                   >
-                    <Image
-                      src="/avatar.webp"
-                      width={30}
-                      height={30}
-                      className="rounded-full"
-                    />
                     <label className="whitespace-nowrap">
                       {trainer.trainername}
                     </label>
                   </td>
                   <td className={styles.tableContent}>{trainer.phonenumber}</td>
                   <td className={styles.tableContent}>{trainer.email}</td>
-                  <td className={styles.tableContent + " flex items-center"}>
+                  <td className={styles.tableContent}>
                     <label className="mr-8">
                       {trainer.cardetails.make +
                         " " +
@@ -178,6 +172,8 @@ function trainer() {
                         " " +
                         trainer.cardetails.vin}
                     </label>
+                  </td>
+                  <td className="flex items-center">
                     <button
                       className={`btn bounce lowercase ${
                         trainer.status === "ONLINE"

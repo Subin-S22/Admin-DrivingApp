@@ -1,7 +1,6 @@
 import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Head from "next/head";
-import Image from "next/image";
 import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import CustomerFormDialog from "../components/customerDialogForm";
@@ -21,6 +20,7 @@ const headings = [
   "Started Date",
   "End Date",
   "Number of Classes",
+  "Actions",
 ];
 
 function Customer() {
@@ -142,12 +142,6 @@ function Customer() {
                   <td
                     className={styles.tableContent + " flex items-center gap-3"}
                   >
-                    <Image
-                      src="/avatar.webp"
-                      width={30}
-                      height={30}
-                      className="rounded-full"
-                    />
                     <label className="whitespace-nowrap">
                       {customer.billnumber}
                     </label>
@@ -159,8 +153,10 @@ function Customer() {
                   </td>
                   <td className={styles.tableContent}>{customer.startDate}</td>
                   <td className={styles.tableContent}>{customer.endDate}</td>
-                  <td className={styles.tableContent + " flex items-center"}>
+                  <td className={styles.tableContent}>
                     <label className="mr-8">{customer.allowschedule}</label>
+                  </td>
+                  <td className="flex items-center mr-4">
                     <button
                       className="btn bounce danger mr-6"
                       onClick={() => {

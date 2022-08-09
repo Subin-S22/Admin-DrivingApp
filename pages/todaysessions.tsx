@@ -1,7 +1,6 @@
 import { PlusIcon, SearchIcon } from "@heroicons/react/solid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Head from "next/head";
-import Image from "next/image";
 import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import MyModal from "../components/Dialog";
@@ -18,6 +17,7 @@ const headings = [
   "Customer Name",
   "Schedule Date",
   "Schedule Time",
+  "Actions",
 ];
 
 function TodaySessions() {
@@ -49,6 +49,8 @@ function TodaySessions() {
   };
 
   const [filter, setFilter] = useState<string>("");
+  const [status, setStatus] = useState<string>("PENDING");
+
   const fetchSessions = async () => {
     return await axiosWithAuth.get("/admin/getAllSchedules");
   };
@@ -56,15 +58,18 @@ function TodaySessions() {
   const { data, isLoading } = useQuery(["all-sessions"], fetchSessions, {
     onError: onError,
     select: (data) => {
-      const temp = data.data.schedules.filter(
-        (schedule: any) =>
-          schedule.scheduledate.includes(filter) ||
-          schedule.scheduletime.includes(filter) ||
-          schedule.trainerdetails.trainername
-            .toLowerCase()
-            .includes(filter.toLowerCase()) ||
-          schedule.user.name.toLowerCase().includes(filter.toLowerCase())
-      );
+      const temp = data.data.schedules.filter((schedule: any) => {
+        return (
+          (schedule.scheduledate.includes(filter) ||
+            schedule.scheduletime.includes(filter) ||
+            schedule.trainerdetails.trainername
+              .toLowerCase()
+              .includes(filter?.toLowerCase()) ||
+            schedule.user.name.toLowerCase().includes(filter?.toLowerCase())) &&
+          schedule.status === status
+        );
+      });
+      console.log("twmp", temp);
       return temp;
     },
   });
@@ -88,7 +93,7 @@ function TodaySessions() {
         <div className="mt-2  flex justify-between items-end p-2">
           <div className="w-3/4">
             <h1 className="text-xl font-Patua font-bold p-2">Sessions</h1>
-            <div className="relative">
+            <div className="relative flex items-center justify-center gap-4">
               <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
                 <SearchIcon className="w-5 h-5 text-gray-600" />
               </div>
@@ -101,6 +106,25 @@ function TodaySessions() {
                 placeholder="Search"
                 onChange={handleSearch}
               />
+              <select
+                className="border border-gray-200 p-[0.7rem] rounded-lg shadow-lg text-gray-500 focus:outline-none focus:border-gray-300"
+                onChange={(e) => {
+                  setStatus(e.target.value);
+                  console.log(e.target.value);
+                }}
+                value={status}
+              >
+                <option hidden>select status to filter...</option>
+                <option value="PENDING" className="font-semibold">
+                  Pending
+                </option>
+                <option value="COMPLETED" className="font-semibold">
+                  Completed
+                </option>
+                <option value="CANCELLED" className="font-semibold">
+                  Canceled
+                </option>
+              </select>
             </div>
           </div>
           <div className="w-full">
@@ -138,12 +162,6 @@ function TodaySessions() {
                         styles.tableContent + " flex items-center gap-3"
                       }
                     >
-                      <Image
-                        src="/avatar.webp"
-                        width={30}
-                        height={30}
-                        className="rounded-full"
-                      />
                       <label className="whitespace-nowrap">
                         {item.trainerdetails.trainername}{" "}
                       </label>
@@ -152,15 +170,29 @@ function TodaySessions() {
                     <td className={styles.tableContent}>{item.scheduledate}</td>
                     <td className={styles.tableContent + " flex items-center"}>
                       <label className="mr-8">{item.scheduletime}</label>
-                      <button
-                        className="btn bounce danger mr-6"
-                        onClick={() => {
-                          setForEdit(item);
-                          actions.handleDialogOpen(true);
-                        }}
-                      >
-                        delete
-                      </button>
+                    </td>
+                    <td>
+                      {item.status === "PENDING" ? (
+                        <button
+                          className="btn bounce danger mr-6"
+                          onClick={() => {
+                            setForEdit(item);
+                            actions.handleDialogOpen(true);
+                          }}
+                        >
+                          delete
+                        </button>
+                      ) : (
+                        <div
+                          className={`text-sm font-bold ${
+                            item.status === "COMPLETED"
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {item.status}
+                        </div>
+                      )}
                       {/* <button
                         className="btn bounce"
                         onClick={() => {

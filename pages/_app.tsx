@@ -9,6 +9,7 @@ import { useRef } from "react";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const queryClient = useRef(new QueryClient());
+
   return (
     <Provider>
       <QueryClientProvider client={queryClient.current}>
