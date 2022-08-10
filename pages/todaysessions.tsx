@@ -172,7 +172,8 @@ function TodaySessions() {
                       <label className="mr-8">{item.scheduletime}</label>
                     </td>
                     <td>
-                      {item.status === "PENDING" ? (
+                      {item.status === "PENDING" ||
+                      item.status === "CANCELLED" ? (
                         <button
                           className="btn bounce danger mr-6"
                           onClick={() => {

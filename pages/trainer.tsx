@@ -9,6 +9,7 @@ import Loader from "../components/Loader";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
 import baseAxios, { axiosWithAuth } from "../services";
+import useLocalStorage from "../sharedHooks/useLocalStorage";
 import { MyContext } from "../store/context";
 import { onError } from "../utils/helpers";
 
@@ -25,6 +26,9 @@ function trainer() {
 
   const store = useContext(MyContext);
   const [forEdit, setForEdit] = useState<any>();
+
+  const token = useLocalStorage("token");
+  console.log(token);
 
   const styles = {
     tableContent:

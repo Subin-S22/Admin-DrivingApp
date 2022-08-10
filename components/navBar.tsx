@@ -1,5 +1,7 @@
 import { useRouter } from "next/router";
 import React from "react";
+import { axiosWithAuth } from "../services";
+import { onError } from "../utils/helpers";
 
 export default function NavBar() {
   const navigate = useRouter();
@@ -22,8 +24,13 @@ export default function NavBar() {
           <button
             className="btn bounce"
             onClick={() => {
-              localStorage.removeItem("token");
-              navigate.push("/login");
+              axiosWithAuth
+                .post("/admin/logout", {})
+                .then(() => {
+                  localStorage.removeItem("token");
+                  navigate.push("/login");
+                })
+                .catch((err) => onError(err));
             }}
           >
             Logout
