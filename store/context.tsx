@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import useLocalStorage from '../sharedHooks/useLocalStorage';
+import React, { useState } from "react";
+import useLocalStorage from "../sharedHooks/useLocalStorage";
 
 interface ContextProp {
   children: React.ReactNode;
@@ -33,13 +33,21 @@ export const MyContext = React.createContext<StoreProp>({
     onsuccess: false,
   },
   actions: {
-    handleDialogOpen(isOpen: boolean) {},
-    handleFormDialogOpen(isOpen: boolean, edit?: boolean) {},
-    handleAuthInfo(token: string) {},
+    handleDialogOpen(isOpen: boolean) {
+      return;
+    },
+    handleFormDialogOpen(isOpen: boolean, edit?: boolean) {
+      return;
+    },
+    handleAuthInfo(token: string) {
+      return;
+    },
     isUserAuth() {
       return false;
     },
-    updateOnChange(isSuccess: boolean) {},
+    updateOnChange(isSuccess: boolean) {
+      return;
+    },
   },
 });
 
@@ -48,7 +56,7 @@ const Provider = ({ children }: ContextProp) => {
   const [isFormDialogOpen, setIsFormDialogOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean | undefined>(false);
   const [auth, setAuth] = useState<string | undefined>();
-  const token = useLocalStorage('token');
+  const token = useLocalStorage("token");
   const [onsuccess, setonSuccess] = useState(false);
 
   const isUserAuth = () => {
@@ -73,7 +81,7 @@ const Provider = ({ children }: ContextProp) => {
       setIsEdit(edit);
     },
     handleAuthInfo: (token: string) => {
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
       setAuth(token);
     },
     isUserAuth,

@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
 import Head from "next/head";
 import React from "react";
@@ -28,15 +28,22 @@ function login() {
     return await baseUrl.post("/admin/login", values);
   };
 
+  const queryClient = useQueryClient();
+
   const useAdminLogin = () => {
     return useMutation(adminLogin, {
       onSuccess: (data: any) => {
         const token = data.data.access_token;
         localStorage.setItem("token", token);
-        signIn("credentials", {
-          data: data.data,
-          redirect: false,
+        queryClient.setQueryData(["user"], () => {
+          return {
+            data: data.data,
+          };
         });
+        // signIn("credentials", {
+        //   data: data.data,
+        //   redirect: false,
+        // });
         toast.success("Welcome!!", {
           position: "top-right",
         });

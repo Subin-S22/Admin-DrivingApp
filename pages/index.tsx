@@ -4,6 +4,7 @@ import Head from "next/head";
 import DashboardCard from "../components/dashboardCard";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
+import { QueryCache } from "@tanstack/react-query";
 
 export interface DashBoardDetail {
   name: string;
