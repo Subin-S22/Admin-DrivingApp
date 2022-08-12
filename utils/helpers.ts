@@ -65,7 +65,8 @@ export const threeDate = () => {
 };
 
 export const scheduleTimes = [
-  "07:00 AM-8:00 AM",
+  "06:00 AM-07:00 AM",
+  "07:00 AM-08:00 AM",
   "08:00 AM-09:00 AM",
   "09:00 AM-10:00 AM",
   "10:00 AM-11:00 AM",

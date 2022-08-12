@@ -190,11 +190,6 @@ export default function CustomerFormDialog({ form }: any) {
                     validationSchema={customerValidation}
                   >
                     <Form>
-                      <CustomField
-                        name="name"
-                        lable="Name"
-                        placeholder="Enter the Customer name..."
-                      />
                       {!data.isEdit && (
                         <CustomField
                           name="billnumber"
@@ -204,6 +199,11 @@ export default function CustomerFormDialog({ form }: any) {
                           placeholder="Enter the Bill number..."
                         />
                       )}
+                      <CustomField
+                        name="name"
+                        lable="Name"
+                        placeholder="Enter the Customer name..."
+                      />
                       <CustomField
                         name="email"
                         lable="Email Address"

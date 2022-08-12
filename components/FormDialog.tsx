@@ -188,16 +188,16 @@ export default function FormDialog({ form }: any) {
                   >
                     <Form>
                       <CustomField
-                        lable="Email Address"
-                        name="email"
-                        placeholder="Enter the trainer email..."
-                        type="email"
-                      />
-                      <CustomField
                         lable="Trainer Name"
                         name="trainername"
                         placeholder="Enter the trainer name..."
                         min={3}
+                      />
+                      <CustomField
+                        lable="Email Address"
+                        name="email"
+                        placeholder="Enter the trainer email..."
+                        type="email"
                       />
                       {!data.isEdit && (
                         <CustomField

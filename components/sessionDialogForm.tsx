@@ -1,7 +1,7 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Form, Formik } from "formik";
+import { Form, Formik, FormikProps } from "formik";
 import { Fragment, useContext, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,9 +51,23 @@ const initial: SessionProp = {
     },
   },
 };
+
+const _formatDate = (date: string) => {
+  console.log(date, "date in format dte");
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+  });
+};
 export default function SessionDialogForm() {
   const [initialValues] = useState<SessionProp>(initial);
   const queryClient = useQueryClient();
+  const [scheduletimes, setSchedulestimes] = useState<string[]>(
+    () => scheduleTimes
+  );
+  const [selectedTrainer, setSelectedTrainer] = useState({});
 
   const store = useContext(MyContext);
   const { data } = store;
@@ -79,6 +93,39 @@ export default function SessionDialogForm() {
     };
 
     return trainerdetails;
+  };
+
+  const handleDateSelected = (date: string) => {
+    const selecteddate = _formatDate(date);
+    const dateavail = (selectedTrainer as any).dayScheduleTimeList.filter(
+      (item: any) => item.scheduledate === selecteddate
+    );
+
+    const trainertime = dateavail.map((time: any) => time.scheduletime);
+    console.log(trainertime);
+
+    const remainingtime = scheduleTimes.filter((times) => {
+      // console.log(times, trainertime.includes(times), trainertime);
+      return !trainertime.includes(times);
+    });
+    // console.log("temp time", temptime, temptime.length);
+
+    setSchedulestimes(remainingtime);
+  };
+
+  const handleTrinerSelected = (
+    e: ChangeEvent<HTMLInputElement>,
+    props: FormikProps<SessionProp>
+  ) => {
+    const selectedtrainer = trainers?.data.trainers.find(
+      (trainer: any) => trainer._id === e.target.value
+    );
+
+    setSelectedTrainer(selectedtrainer);
+
+    if (props.values.scheduledate) {
+      handleDateSelected(props.values.scheduledate);
+    }
   };
 
   const handleTrainerSubmit = async (values: SessionProp) => {
@@ -123,6 +170,7 @@ export default function SessionDialogForm() {
   const { mutate } = useMutation(handleTrainerSubmit, {
     onSuccess: () => {
       queryClient.invalidateQueries(["all-sessions"]);
+      queryClient.invalidateQueries(["all-trainers"]);
     },
   });
 
@@ -182,11 +230,7 @@ export default function SessionDialogForm() {
                   >
                     Add Session Details
                   </Dialog.Title>
-                  {/* <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      If you delete this, you can not undo the actions. Please check once before you proceed.
-                    </p>
-                  </div> */}
+
                   <Formik
                     initialValues={initialValues}
                     enableReinitialize={true}
@@ -195,7 +239,7 @@ export default function SessionDialogForm() {
                     }}
                     validationSchema={sessionValidation}
                   >
-                    {() => (
+                    {(props: FormikProps<SessionProp>) => (
                       <Form>
                         <CustomField name="userId" as="select" lable="User">
                           <option hidden>Select user...</option>
@@ -208,31 +252,16 @@ export default function SessionDialogForm() {
                           })}
                         </CustomField>
                         <CustomField
-                          name="scheduledate"
-                          lable="Schedule Date"
-                          type="date"
-                          placeholder="Enter the Schedule date..."
-                          min={nextDate()}
-                          max={threeDate()}
-                        />
-
-                        <CustomField
-                          name="scheduletime"
-                          lable="Schedule Time"
-                          placeholder="Enter the Schedule time..."
-                          as="select"
-                        >
-                          <option hidden>Select Time..</option>
-                          {scheduleTimes.map((time) => (
-                            <option value={time} key={time} className="p-4">
-                              {time}
-                            </option>
-                          ))}
-                        </CustomField>
-                        <CustomField
                           name="trainerId"
                           as="select"
                           lable="Trainer"
+                          onChange={(
+                            e: React.ChangeEvent<HTMLInputElement>
+                          ) => {
+                            props.setFieldValue("trainerId", e.target.value);
+                            console.log(props.values);
+                            handleTrinerSelected(e, props);
+                          }}
                         >
                           <option hidden>Select trainer...</option>
                           {trainers?.data.trainers.map((trainer: any) => (
@@ -242,6 +271,31 @@ export default function SessionDialogForm() {
                               className="p-4"
                             >
                               {trainer.trainername}
+                            </option>
+                          ))}
+                        </CustomField>
+                        <CustomField
+                          name="scheduledate"
+                          lable="Schedule Date"
+                          type="date"
+                          placeholder="Enter the Schedule date..."
+                          min={nextDate()}
+                          max={threeDate()}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            props.setFieldValue("scheduledate", e.target.value);
+                            handleDateSelected(e.target.value);
+                          }}
+                        />
+                        <CustomField
+                          name="scheduletime"
+                          lable="Schedule Time"
+                          placeholder="Enter the Schedule time..."
+                          as="select"
+                        >
+                          <option hidden>Select Time..</option>
+                          {scheduletimes.map((time) => (
+                            <option value={time} key={time} className="p-4">
+                              {time}
                             </option>
                           ))}
                         </CustomField>
