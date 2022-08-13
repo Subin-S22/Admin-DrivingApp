@@ -1,6 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth/next";
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, User } from "next-auth";
+import baseAxios from "../../../services";
 
 const authOptions: NextAuthOptions = {
   session: {
@@ -17,11 +18,17 @@ const authOptions: NextAuthOptions = {
       credentials: {},
       async authorize(credentials: any, req) {
         // Add logic here to look up the user from the credentials supplied
-        const user = credentials.data;
-        console.log("credentails", credentials.data);
+        // const user = credentials;
+        const user = { id: 1, name: "J Smith", email: "jsmith@example.com" };
+        // console.log("credentails", credentials);
         if (user) {
+          // const res = await baseAxios.post("/admin/login", credentials);
+          // console.log("res", res);
+
+          // return res.data;
+          return { email: credentials.email, jwt: "asdkfjklj" };
+
           // Any object returned will be saved in `user` property of the JWT
-          return user;
         } else {
           // If you return null then an error will be displayed advising the user to check their details.
           throw new Error("Invalid Credentials");
@@ -32,7 +39,7 @@ const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/login.tsx",
+    signIn: "/",
   },
 };
 

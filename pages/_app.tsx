@@ -10,7 +10,7 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "react-toastify";
 import { useRef } from "react";
-// import { SessionProvider } from "next-auth/react";
+import { SessionProvider } from "next-auth/react";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const queryClient = useRef(new QueryClient());
@@ -19,11 +19,13 @@ function MyApp({ Component, pageProps }: AppProps) {
     // <SessionProvider session={pageProps.session}>
     <Provider>
       <QueryClientProvider client={queryClient.current}>
-        <Hydrate state={pageProps.dehydratedState}>
-          <Component {...pageProps} />
-          <ToastContainer />
-          <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
-        </Hydrate>
+        <SessionProvider session={pageProps.session}>
+          <Hydrate state={pageProps.dehydratedState}>
+            <Component {...pageProps} />
+            <ToastContainer />
+            <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+          </Hydrate>
+        </SessionProvider>
       </QueryClientProvider>
     </Provider>
     // </SessionProvider>
