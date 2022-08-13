@@ -69,7 +69,6 @@ function TodaySessions() {
           schedule.status === status
         );
       });
-      console.log("twmp", temp);
       return temp;
     },
   });
@@ -110,7 +109,6 @@ function TodaySessions() {
                 className="border border-gray-200 p-[0.7rem] rounded-lg shadow-lg text-gray-500 focus:outline-none focus:border-gray-300"
                 onChange={(e) => {
                   setStatus(e.target.value);
-                  console.log(e.target.value);
                 }}
                 value={status}
               >

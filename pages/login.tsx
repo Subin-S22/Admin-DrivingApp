@@ -36,7 +36,6 @@ function login() {
         });
         navigate.push("/");
       },
-
       onError: (error: any) => {
         toast.error(error.response?.data.message, {
           position: "top-right",
@@ -51,9 +50,6 @@ function login() {
   const handleSubmit = async (values: LoginProps) => {
     try {
       mutate(values);
-      // const res = await baseUrl.post('/admin/login', values)
-      // console.log(res)
-      // localStorage.setItem('token', res.data.token)
     } catch (err) {
       toast.error("Invalid Credentials", {
         position: "top-right",

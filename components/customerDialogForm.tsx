@@ -103,8 +103,6 @@ export default function CustomerFormDialog({ form }: any) {
     },
   });
 
-  console.log("alksdjf", isUpdated);
-
   const handleTrainerSubmit = async (values: CustomerProp) => {
     //start date formated
     const formatSD = new Date(values.startDate).toLocaleDateString("en-IN", {

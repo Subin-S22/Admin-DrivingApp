@@ -4,6 +4,7 @@ import Head from "next/head";
 import DashboardCard from "../components/dashboardCard";
 import NavBar from "../components/navBar";
 import NavigationBar from "../components/navigationBar";
+import useLocalStorage from "../sharedHooks/useLocalStorage";
 
 export interface DashBoardDetail {
   name: string;
@@ -27,6 +28,7 @@ const dashboardInfo: DashBoardDetail[] = [
 ];
 
 const Home: NextPage = () => {
+  useLocalStorage("token");
   return (
     <main className=" min-h-screen">
       <Head>
