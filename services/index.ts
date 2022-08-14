@@ -15,16 +15,5 @@ export const axiosWithAuth = axios.create({
         : "no token",
   },
 });
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    console.log("token", token);
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 export default baseAxios;

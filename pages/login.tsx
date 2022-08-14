@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CustomField from "../components/customField";
 import CarLogo from "../public/carlogo.webp";
-import baseUrl from "../services";
+import baseUrl, { axiosWithAuth } from "../services";
 import Loader from "../components/Loader";
 
 interface LoginProps {
@@ -34,6 +34,8 @@ function login() {
         toast.success("Welcome!!", {
           position: "top-right",
         });
+        axiosWithAuth.defaults.headers.common["Authorization"] =
+          data.data.access_token;
         navigate.push("/");
       },
       onError: (error: any) => {
