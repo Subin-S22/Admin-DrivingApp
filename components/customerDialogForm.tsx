@@ -97,7 +97,7 @@ export default function CustomerFormDialog({ form }: any) {
 
   const { mutate } = useUser();
 
-  const { mutate: patchUser, isLoading: isUpdated } = useMutation(updateUser, {
+  const { mutate: patchUser } = useMutation(updateUser, {
     onSuccess: () => {
       queryClient.invalidateQueries(["all-customers"]);
     },
